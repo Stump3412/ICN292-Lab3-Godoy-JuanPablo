@@ -1,0 +1,431 @@
+{
+  "name": "Workflow de resumen",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 23,
+              "triggerAtMinute": 59
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        16,
+        0
+      ],
+      "id": "de137730-a33a-405e-8adf-68fb651a131e",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "iv2WO0gbReRhRi9o",
+          "mode": "list",
+          "cachedResultName": "Tabla",
+          "cachedResultUrl": "/projects/6r5aTv1NL7J7xaXn/datatables/iv2WO0gbReRhRi9o"
+        },
+        "filters": {
+          "conditions": []
+        },
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        240,
+        0
+      ],
+      "id": "033d7556-60c4-486f-8ac7-02679899399d",
+      "name": "Leer registro del día",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "field": "id_solicitud"
+            },
+            {
+              "aggregation": "sum",
+              "field": "monto_uf"
+            }
+          ]
+        },
+        "fieldsToSplitBy": "ruta",
+        "options": {
+          "outputFormat": "singleItem"
+        }
+      },
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1.1,
+      "position": [
+        992,
+        -80
+      ],
+      "id": "b0e22ada-81be-4e42-98f4-87699bd3c1ed",
+      "name": "Resumen por ruta"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6b5d9da2-ec1e-488a-adcd-d68c3fe86208",
+              "name": "aprobadas",
+              "value": "={{ $json.APROBACION?.count_id_solicitud ?? 0}}",
+              "type": "number"
+            },
+            {
+              "id": "24456ae6-7fd5-407b-aa81-f5c428faad55",
+              "name": "revision",
+              "value": "={{ $json.REVISION?.count_id_solicitud ?? 0 }}",
+              "type": "number"
+            },
+            {
+              "id": "524a9dab-2f22-4f6a-8ca4-60e76ee6f3b0",
+              "name": "rechazadas",
+              "value": "={{ $json.RECHAZO?.count_id_solicitud ?? 0 }}",
+              "type": "number"
+            },
+            {
+              "id": "cea3ecb2-1d8b-4c12-9fe9-5f4f2f0fc2a6",
+              "name": "invalidas",
+              "value": "={{ $json.DATOS_INVALIDOS?.count_id_solicitud ?? 0 }}",
+              "type": "number"
+            },
+            {
+              "id": "18eb18cc-efbf-41e6-8113-f2f2297e5d8b",
+              "name": "monto_aprobacion_uf",
+              "value": "={{ Number(($json.APROBACION?.sum_monto_uf ?? 0).toFixed(2)) }}",
+              "type": "number"
+            },
+            {
+              "id": "5016998a-323f-4441-bb5a-203423d0ddd4",
+              "name": "monto_revision_uf",
+              "value": "={{ Number(($json.REVISION?.sum_monto_uf ?? 0).toFixed(2)) }}",
+              "type": "number"
+            },
+            {
+              "id": "d2210c2c-0577-432a-92ed-6242155096ff",
+              "name": "monto_rechazo_uf",
+              "value": "={{ Number(($json.RECHAZO?.sum_monto_uf ?? 0).toFixed(2)) }}",
+              "type": "number"
+            },
+            {
+              "id": "686bd3c2-282d-470b-9bbc-2ca2bd25b3c6",
+              "name": "monto_invalidas_uf",
+              "value": "={{ Number(($json.DATOS_INVALIDOS?.sum_monto_uf ?? 0).toFixed(2)) }}",
+              "type": "number"
+            },
+            {
+              "id": "8e420265-6c51-47d8-b257-b001f5d30186",
+              "name": "total_solicitudes",
+              "value": "={{ \n  ($json.APROBACION?.count_id_solicitud ?? 0) +\n  ($json.REVISION?.count_id_solicitud ?? 0) +\n  ($json.RECHAZO?.count_id_solicitud ?? 0) +\n  ($json.DATOS_INVALIDOS?.count_id_solicitud ?? 0)\n}}",
+              "type": "number"
+            },
+            {
+              "id": "605c2f07-cac2-4be4-9ecb-69eb15deb37e",
+              "name": "monto_total_uf",
+              "value": "={{\n  Number((\n    ($json.APROBACION?.sum_monto_uf ?? 0) +\n    ($json.REVISION?.sum_monto_uf ?? 0) +\n    ($json.RECHAZO?.sum_monto_uf ?? 0) +\n    ($json.DATOS_INVALIDOS?.sum_monto_uf ?? 0)\n  ).toFixed(2))\n}}",
+              "type": "number"
+            },
+            {
+              "id": "368ef037-6092-4c5c-b918-5e14a6df7918",
+              "name": "tasa_aprobacion",
+              "value": "={{\n  Number((\n    (($json.APROBACION?.count_id_solicitud ?? 0) /\n    (\n      ($json.APROBACION?.count_id_solicitud ?? 0) +\n      ($json.REVISION?.count_id_solicitud ?? 0) +\n      ($json.RECHAZO?.count_id_solicitud ?? 0) +\n      ($json.DATOS_INVALIDOS?.count_id_solicitud ?? 0)\n    )) * 100\n  ).toFixed(2))\n}}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1216,
+        -80
+      ],
+      "id": "dcba8d64-e641-4289-902e-47dfb5e1eb5c",
+      "name": "Indicadores"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "98acabfa-c88d-4ad9-99f6-613a95d7517a",
+              "name": "mensaje",
+              "value": "={{ `RESUMEN DIARIO DE DEVOLUCIONES\nFecha: ${$now.toFormat('dd-MM-yyyy')}\n\nSolicitudes por ruta:\n- APROBACIÓN: ${$json.aprobadas ?? 0} solicitudes | ${Number($json.monto_aprobacion_uf ?? 0).toFixed(2)} UF\n- REVISIÓN: ${$json.revision ?? 0} solicitudes | ${Number($json.monto_revision_uf ?? 0).toFixed(2)} UF\n- RECHAZO: ${$json.rechazadas ?? 0} solicitudes | ${Number($json.monto_rechazo_uf ?? 0).toFixed(2)} UF\n- DATOS INVÁLIDOS: ${$json.invalidas ?? 0} solicitudes | ${Number($json.monto_invalidas_uf ?? 0).toFixed(2)} UF\n\nTotal de solicitudes: ${$json.total_solicitudes ?? 0}\nMonto total del día: ${Number($json.monto_total_uf ?? 0).toFixed(2)} UF\nTasa de aprobación: ${Number($json.tasa_aprobacion ?? 0).toFixed(2)}%` }}",
+              "type": "string"
+            },
+            {
+              "id": "9f8d3d37-cc6f-4472-910d-b5f270facccf",
+              "name": "",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1440,
+        -80
+      ],
+      "id": "ba378216-6bdb-45e6-990e-9566fe4f0f1c",
+      "name": "Preparar mensaje"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a4d64526-9923-45a0-bf47-4ce0b7637434",
+              "leftValue": "={{ $json.createdAt }}",
+              "rightValue": "={{ $today.startOf('day').toISO() }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "afterOrEquals"
+              }
+            },
+            {
+              "id": "6b978c74-23d6-4e6c-a0b9-17f399550165",
+              "leftValue": "={{ $json.createdAt }}",
+              "rightValue": "={{ $today.plus({ days: 1 }).startOf('day').toISO() }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "before"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        464,
+        0
+      ],
+      "id": "adc941c5-0007-42e8-a136-ef654144edeb",
+      "name": "Solicitudes de hoy",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "0e897708-32d9-4b2c-a7a7-e95448b55057",
+              "leftValue": "={{ $json.id_solicitud ?? '' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        672,
+        0
+      ],
+      "id": "2cd689c1-5337-484a-be17-9a6599a274e3",
+      "name": "Hubo solicitudes?"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1d3aa230-42b0-4105-baf1-3d4208a72d61",
+              "name": "mensaje",
+              "value": "={{ `RESUMEN DIARIO DE DEVOLUCIONES Fecha: ${$now.toFormat('dd-MM-yyyy')}  No se registraron solicitudes de devolución durante el día.  Total de solicitudes: 0 Monto total del día: 0.00 UF Tasa de aprobación: 0.00%` }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        992,
+        144
+      ],
+      "id": "bb81ec9d-b8cd-4e8a-9e64-e958557b8bba",
+      "name": "Mensaje sin solicitudes"
+    },
+    {
+      "parameters": {
+        "fromEmail": "Jpgodoyfajardo@gmail.com",
+        "toEmail": "Jpgodoyfajardo@gmail.com",
+        "subject": "Mensaje Resumen LAB3 n8n",
+        "emailFormat": "text",
+        "text": "={{ $json.mensaje }}",
+        "options": {
+          "appendAttribution": true
+        }
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1696,
+        16
+      ],
+      "id": "e4a8f4cf-dfd8-4049-a636-d9680ae478d6",
+      "name": "Send an Email",
+      "webhookId": "0a83c25e-b414-4940-ba0d-e4942c2ec33d",
+      "credentials": {
+        "smtp": {
+          "id": "Ew3W50AgwixN0Ytj",
+          "name": "SMTP account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Leer registro del día",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer registro del día": {
+      "main": [
+        [
+          {
+            "node": "Solicitudes de hoy",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resumen por ruta": {
+      "main": [
+        [
+          {
+            "node": "Indicadores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Indicadores": {
+      "main": [
+        [
+          {
+            "node": "Preparar mensaje",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Solicitudes de hoy": {
+      "main": [
+        [
+          {
+            "node": "Hubo solicitudes?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hubo solicitudes?": {
+      "main": [
+        [
+          {
+            "node": "Resumen por ruta",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mensaje sin solicitudes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar mensaje": {
+      "main": [
+        [
+          {
+            "node": "Send an Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mensaje sin solicitudes": {
+      "main": [
+        [
+          {
+            "node": "Send an Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "timezone": "America/Santiago",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "d22e314c-6fbe-4b1e-8714-4711603aab06",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b28bf0a7ca5319d6b2284573c4382a7c9be0eb78e9387174414f585ffc6c0692"
+  },
+  "nodeGroups": [],
+  "id": "IqbddP6VBnoO8Arg",
+  "tags": []
+}
